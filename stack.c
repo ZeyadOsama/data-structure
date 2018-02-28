@@ -1,6 +1,6 @@
 /*
  *
- * C Program to Implement Constrict Stack Using Dynamic Memory Allocation
+ * C Program to Implement Constricted Stack Using Dynamic Memory Allocation
  *
  */
 
