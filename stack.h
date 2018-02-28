@@ -8,7 +8,7 @@ typedef struct { } Stack;
 
 // instantiating and destructing stack
 Stack * constructStack (int size);
-void destructStack (Stack * stack);
+int destructStack (Stack * stack);
 
 int push (Stack * stack , TYPE value);
 TYPE pop (Stack * stack);
@@ -20,7 +20,7 @@ int isEmptyStack (Stack * stack);
 void displayStack (Stack * stack);
 void searchStack (Stack * stack , TYPE target);
 
-void unloadStack (Stack * stack);
+int unloadStack (Stack * stack);
 
 void stackExeptionHandler (Stack * stack);
 
