@@ -1,32 +1,26 @@
 #ifndef STACK_H_INCLUDED
 #define STACK_H_INCLUDED
 
-#include <stdbool.h>
-
+// to change stack type
 #define TYPE int
 
-typedef struct
-{
+typedef struct { } Stack;
 
-}Stack;
-
+// instantiating and destructing stack
 Stack * constructStack (int size);
-
 void destructStack (Stack * stack);
 
 int push (Stack * stack , TYPE value);
-
 TYPE pop (Stack * stack);
 
+// boolean checks
 int isFullStack (Stack * stack);
-
 int isEmptyStack (Stack * stack);
 
-void unloadStack (Stack * stack);
-
 void displayStack (Stack * stack);
-
 void searchStack (Stack * stack , TYPE target);
+
+void unloadStack (Stack * stack);
 
 void stackExeptionHandler (Stack * stack);
 
