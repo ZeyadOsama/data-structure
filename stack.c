@@ -13,28 +13,14 @@
 #define false 0
 
 
-/* prototypes
- */
-Stack * constructStack (int length);
-void destructStack (Stack*);
-int push (Stack* , TYPE value);
-TYPE pop (Stack*);
-int isFullStack (Stack*);
-int isEmptyStack (Stack*);
-void displayStack (Stack*);
-void searchStack (Stack* , TYPE target);
-void unloadStack (Stack*);
-void stackExeptionHandler (Stack*);
-
-
 /* defining enumeration for exceptions tags
  */
-typedef enum 
-{ 
-	NO_EXCEPETIONS , 
-	STACK_IS_EMPTY , 
-	STACK_IS_FULL , 
-	STACK_IS_DESTRUCTED 
+typedef enum
+{
+	NO_EXCEPETIONS ,
+	STACK_IS_EMPTY ,
+	STACK_IS_FULL ,
+	STACK_IS_DESTRUCTED
 } ExceptionTags;
 
 
@@ -53,6 +39,19 @@ typedef struct
 	int exception;
 } Stack;
 
+
+/* prototypes
+ */
+Stack * constructStack (int length);
+int destructStack (Stack*);
+int push (Stack* , TYPE value);
+TYPE pop (Stack*);
+int isFullStack (Stack*);
+int isEmptyStack (Stack*);
+void displayStack (Stack*);
+void searchStack (Stack* , TYPE target);
+int unloadStack (Stack*);
+void stackExeptionHandler (Stack*);
 
 
 /* expects one parameter: length of stack (array within the stack struct).
@@ -103,8 +102,6 @@ int destructStack (Stack * stack)
  */
 int push (Stack * stack , TYPE value)
 {
-	return isFullStack(stack) ? stack->exception = STACK_IS_FULL : stack->exception = NO_EXCEPETIONS
-
 	// check first if already full
 	if(isFullStack(stack))
         return stack->exception = STACK_IS_FULL;
@@ -123,8 +120,6 @@ int push (Stack * stack , TYPE value)
  */
 TYPE pop (Stack * stack)
 {
-	return isEmptyStack(stack) ? stack->exception = STACK_IS_EMPTY : stack->items[--stack->top];
-
 	// check first if already empty
 	if(isEmptyStack(stack))
         return stack->exception = STACK_IS_EMPTY;
