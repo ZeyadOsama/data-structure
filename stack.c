@@ -1,57 +1,16 @@
 /*
  *
- * C Program to Implement Constrict Stack Using Dynamic Memory Allocation
+ * C Program To Implement Constricted Stack Using Dynamic Memory Allocation
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TYPE int
+#include "stack.h"
 
 #define true 1
 #define false 0
-
-
-/* defining enumeration for exceptions tags
- */
-typedef enum
-{
-	NO_EXCEPETIONS ,
-	STACK_IS_EMPTY ,
-	STACK_IS_FULL ,
-	STACK_IS_DESTRUCTED
-} ExceptionTags;
-
-
-/* stack data-type declaration
- */
-typedef struct
-{
-	int top;
-	int length;
-
-	// pointer to array of a given data-type
-	// to be dynamically allocated by length through run-time
-	TYPE * items;
-
-	// holds exception -if there- for a given stack
-	int exception;
-} Stack;
-
-
-/* prototypes
- */
-Stack * constructStack (int length);
-int destructStack (Stack*);
-int push (Stack* , TYPE value);
-TYPE pop (Stack*);
-int isFullStack (Stack*);
-int isEmptyStack (Stack*);
-void displayStack (Stack*);
-void searchStack (Stack* , TYPE target);
-int unloadStack (Stack*);
-void stackExeptionHandler (Stack*);
 
 
 /* expects one parameter: length of stack (array within the stack struct).
@@ -65,17 +24,20 @@ Stack * constructStack (int length)
 	if(stack==NULL)
         return NULL;
 
-	// dynamically allocating memory for items
-	stack->items = (TYPE*) malloc(length*sizeof(TYPE));
+	// dynamically allocating memory for elements
+	stack->elements = (TYPE*) malloc(length*sizeof(TYPE));
 
 	// failure check
-	if(stack->items==NULL)
+	if(stack->elements==NULL)
 	{
+		stack->exception = FAILED_TO_CONSTRUCT;
+
 		// freeing stack struct if array within the struct could not be allocated
 		free(stack);
         return NULL;
 	}
 
+	// if succuessfully allocated
 	// initializing stack content
 	stack->top = 0;
 	stack->length = length;
@@ -90,10 +52,10 @@ Stack * constructStack (int length)
 int destructStack (Stack * stack)
 {
 	stack->exception = STACK_IS_DESTRUCTED;
-    free(stack->items);
+    free(stack->elements);
     free(stack);
 
-	return STACK_IS_DESTRUCTED;
+	return NO_EXCEPETIONS;
 }
 
 
@@ -107,7 +69,7 @@ int push (Stack * stack , TYPE value)
         return stack->exception = STACK_IS_FULL;
 
 	// increment top then push
-	stack->items[stack->top++]=value;
+	stack->elements[stack->top++]=value;
 
 	// no thrown exceptions
 	return stack->exception = NO_EXCEPETIONS;
@@ -128,7 +90,21 @@ TYPE pop (Stack * stack)
     stack->exception = NO_EXCEPETIONS;
 
 	// decrement top then pop
-	return stack->items[--stack->top];
+	return stack->elements[--stack->top];
+}
+
+
+
+/* expects one parameter: any given stack address.
+ * functionality: returns top element value
+ */
+TYPE getPeekValue (Stack * stack)
+{
+    // avoid garbage display
+	if (isEmptyStack(stack))
+        return NULL;
+
+    return stack->elements[stack->top-1];
 }
 
 
