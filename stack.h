@@ -4,7 +4,34 @@
 // to change stack type
 #define TYPE int
 
-typedef struct { } Stack;
+
+/* defining enumeration for exceptions tags
+ */
+typedef enum
+{
+	NO_EXCEPETIONS ,
+	FAILED_TO_CONSTRUCT ,
+	STACK_IS_EMPTY ,
+	STACK_IS_FULL ,
+	STACK_IS_DESTRUCTED
+} ExceptionTags;
+
+
+/* stack data-type declaration
+ */
+typedef struct
+{
+	int top;
+	int length;
+
+	// pointer to array of a given data-type
+	// to be dynamically allocated by length through run-time
+	TYPE * elements;
+
+	// holds exception -if there- for a given stack
+	int exception;
+} Stack;
+
 
 // instantiating and destructing stack
 Stack * constructStack (int size);
@@ -13,10 +40,14 @@ int destructStack (Stack * stack);
 int push (Stack * stack , TYPE value);
 TYPE pop (Stack * stack);
 
+TYPE getPeekValue (Stack * stack);
+
 // boolean checks
 int isFullStack (Stack * stack);
 int isEmptyStack (Stack * stack);
 
+
+// utility functions
 void displayStack (Stack * stack);
 void searchStack (Stack * stack , TYPE target);
 
