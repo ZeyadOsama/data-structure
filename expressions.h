@@ -12,7 +12,7 @@ int isOperator (char character);
 
 // conversion functions
 String infixToPostfix (String infix);
-String postfixToInfix (String postfix)
+String postfixToInfix (String postfix);
 
 // evaluation functions
 TYPE evaluatePostfix (String postfix);
