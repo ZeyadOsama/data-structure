@@ -10,7 +10,6 @@
 
 #include "myString.h"
 #include "stack.h"
-#include "expressions.h"
 
 #define true 1
 #define false 0
@@ -53,7 +52,7 @@ int isOperator (char character)
     }
 
 }
- 
+
 
 /* utility function.
  * returns precedence of a given operator.
@@ -66,11 +65,11 @@ int getPriority (char character)
         case '+':
         case '-':
             return 1;
-     
+
         case '*':
         case '/':
             return 2;
-     
+
         case '^':
             return 3;
 
@@ -87,36 +86,80 @@ int getPriority (char character)
  */
 String infixToPostfix (String infix)
 {
+    // stores operands
+    Stack * operands = constructStack(strlen(infix));
 
-    String postfix;
+    // postfix string declaration
+    char * postfix = NULL;
 
-    // iterators
-    int i, k;
- 
-    // create a stack of capacity to push operators.
-    // stack is equal to expression size.
-    Stack * stack = constructStack(strlen(infix)-1);
-    
- 
-    // pop all the operators from the stack
-    while (!isEmptyStack(stack))
-        exp[++k] = pop(stack );
- 
-    exp[++k] = '\0';
+    // string iterator for reallocating and storing
+    int k = 0;
 
-    // return postfix string
-    return exp;
+    while ( *infix != NULL )
+    {
+        // checks whether entered value is either
+        // decimal digit or an uppercase or lowercase letter
+        // if ( isalnum(*infix) )
+        if ( isNumericOperand(*infix) || isAlphaOperand(*infix) )
+        {
+            postfix = realloc(postfix, (++k)*sizeof(char) );
+            postfix[k-1] = *infix;
+        }
+
+
+        // scanned character is an '('
+        // push to stack
+        else if ( *infix == '(' )
+            push(operands , *infix);
+
+
+        // scanned character is an ')'
+        // pop and output from the stack until an '(' is encountered
+        else if ( *infix == ')' )
+        {
+            // dummy variable to store popped element to be added to string later
+            char temp;
+
+            while ( (temp = pop(operands)) != '(')
+            {
+                postfix = realloc(postfix, (++k)*sizeof(char) );
+                postfix[k-1] = temp;
+            }
+        }
+
+
+        else if ( isOperator(*infix) )
+        {
+            // check priority
+            while ( getPriority(getPeekValue(operands)) >= getPriority(*infix) )
+            {
+                // scanned character priority is less than stack's peek value
+                // pop all less prior
+                postfix = realloc(postfix, (++k)*sizeof(char) );
+                postfix[k-1] =pop(operands);
+            }
+
+            // then push scanned character
+            push(operands , *infix);
+        }
+
+        // increment pointer
+        infix++;
+    }
+
+    while (!isEmptyStack(operands))
+    {
+        postfix = realloc(postfix, (++k)*sizeof(char) );
+        postfix[k-1] =pop(operands);
+    }
+
+    // add null char to end string
+    postfix = realloc(postfix, (++k)*sizeof(char) );
+    postfix[k-1] ='\0';
+
+    return postfix;
 }
 
-
-/* function that converts given postfix expression to infix expression
- */
-String postfixToInfix (String postfix)
-{
-    
-    return infix;
-}
- 
 
 /* evaluates a given postfix expression
  */
@@ -178,10 +221,10 @@ TYPE evaluatePostfix (String postfix)
 /* evaluates a given infix expression.
  * converts first to postfix.
  */
-TYPE evaluateInfix (String postfix)
+TYPE evaluateInfix (String infix)
 {
     // converting step
-    char postfix[] = infixToPostfix (String infix);
+    String postfix = infixToPostfix(infix);
 
     return evaluatePostfix(postfix);
 }
