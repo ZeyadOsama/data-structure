@@ -1,6 +1,6 @@
 /*
  *
- * C Program To Handle Expressions
+ * C Program To Handle Expressions.
  *
  */
 
@@ -56,7 +56,7 @@ int isOperator (char character)
 
 /* utility function.
  * returns precedence of a given operator.
- * higher returned value means higher precedence,
+ * higher returned value means higher precedence.
  */
 int getPriority (char character)
 {
@@ -95,11 +95,14 @@ String infixToPostfix (String infix)
     // string iterator for reallocating and storing
     int k = 0;
 
-    while ( *infix != NULL )
+    // boolean variable for mismatched parenthesis exception
+    int waitingForClosingBracket = false;
+
+    while ( *infix != '\0' )
     {
         // checks whether entered value is either
         // decimal digit or an uppercase or lowercase letter
-        // if ( isalnum(*infix) )
+        // i.e. can also be -> if ( isalnum(*infix) )
         if ( isNumericOperand(*infix) || isAlphaOperand(*infix) )
         {
             postfix = realloc(postfix, (++k)*sizeof(char) );
@@ -110,18 +113,31 @@ String infixToPostfix (String infix)
         // scanned character is an '('
         // push to stack
         else if ( *infix == '(' )
+        {
+            // bracket opened
+            waitingForClosingBracket = true;
+            
             push(operands , *infix);
+        }
 
 
         // scanned character is an ')'
         // pop and output from the stack until an '(' is encountered
         else if ( *infix == ')' )
         {
+            // bracket closed
+            waitingForClosingBracket = false;
+
             // dummy variable to store popped element to be added to string later
             char temp;
 
-            while ( (temp = pop(operands)) != '(')
+            while ( !isEmptyStack(operands) && (temp = pop(operands)) != '(')
             {
+                // check for mismatched parenthesis
+                // i.e. closing parenthesis with no opening one
+                if( isEmptyStack(operands) && temp != '(' )
+                    return NULL;
+
                 postfix = realloc(postfix, (++k)*sizeof(char) );
                 postfix[k-1] = temp;
             }
@@ -157,6 +173,12 @@ String infixToPostfix (String infix)
     postfix = realloc(postfix, (++k)*sizeof(char) );
     postfix[k-1] ='\0';
 
+
+    // check for mismatched parenthesis
+    // i.e. opening parenthesis with no closing one    
+    if (waitingForClosingBracket)
+        return NULL;
+
     return postfix;
 }
 
@@ -189,11 +211,11 @@ TYPE evaluatePostfix (String postfix)
             int x,y;
 
             // first operand sanity check
-            if(isEmptyStack(operands)) return NULL;
+            if(isEmptyStack(operands)) return (TYPE)NULL;
             else x = pop(operands);
 
             // second operand sanity check
-            if(isEmptyStack(operands)) return NULL;
+            if(isEmptyStack(operands)) return (TYPE)NULL;
             else y = pop(operands);
 
             // switch on operator
@@ -205,14 +227,14 @@ TYPE evaluatePostfix (String postfix)
                 case '/' : push(operands, x/y); break;
 
                 // error
-                default : return NULL;
+                default : return (TYPE)NULL;
             }
         }
     }
 
     // stack at this point of time can not have more than one element
     if(operands->top != 1)
-        return NULL;
+        return (TYPE)NULL;
 
     return getPeekValue(operands);
 }
