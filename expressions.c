@@ -50,7 +50,6 @@ int isOperator (char character)
         default:
             return false;
     }
-
 }
 
 
