@@ -82,12 +82,13 @@ int getPriority (char character)
 }
 
 
-/* function that converts given infix expression to postfix expression
+/* function that converts given infix expression to postfix expression.
+ * returns NULL in exception cases.
  */
 String infixToPostfix (String infix)
 {
-    // stores operands
-    Stack * operands = constructStack(strlen(infix));
+    // stores operators
+    Stack * operators = constructStack(strlen(infix));
 
     // postfix string declaration
     char * postfix = NULL;
@@ -117,7 +118,7 @@ String infixToPostfix (String infix)
             // bracket opened
             waitingForClosingBracket = true;
             
-            push(operands , *infix);
+            push(operators , *infix);
         }
 
 
@@ -131,11 +132,11 @@ String infixToPostfix (String infix)
             // dummy variable to store popped element to be added to string later
             char temp;
 
-            while ( !isEmptyStack(operands) && (temp = pop(operands)) != '(')
+            while ( !isEmptyStack(operators) && (temp = pop(operators)) != '(')
             {
                 // check for mismatched parenthesis
                 // i.e. closing parenthesis with no opening one
-                if( isEmptyStack(operands) && temp != '(' )
+                if( isEmptyStack(operators) && temp != '(' )
                     return NULL;
 
                 postfix = realloc(postfix, (++k)*sizeof(char) );
@@ -147,26 +148,26 @@ String infixToPostfix (String infix)
         else if ( isOperator(*infix) )
         {
             // check priority
-            while ( getPriority(getPeekValue(operands)) >= getPriority(*infix) )
+            while ( getPriority(getPeekValue(operators)) >= getPriority(*infix) )
             {
                 // scanned character priority is less than stack's peek value
                 // pop all less prior
                 postfix = realloc(postfix, (++k)*sizeof(char) );
-                postfix[k-1] =pop(operands);
+                postfix[k-1] =pop(operators);
             }
 
             // then push scanned character
-            push(operands , *infix);
+            push(operators , *infix);
         }
 
         // increment pointer
         infix++;
     }
 
-    while (!isEmptyStack(operands))
+    while (!isEmptyStack(operators))
     {
         postfix = realloc(postfix, (++k)*sizeof(char) );
-        postfix[k-1] =pop(operands);
+        postfix[k-1] =pop(operators);
     }
 
     // add null char to end string
