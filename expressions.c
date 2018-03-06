@@ -242,22 +242,21 @@ TYPE evaluatePostfix (String postfix)
     // stack to store operands
     Stack * operands = constructStack(strlen(postfix));
 
-    int i;
-    for (i=0 ; i<strlen(postfix) ; i++)
+    while ( *postfix != '\0' )
     {
         // delimiters should be excluded
-        if ( !isOperator(postfix[i]) && !isNumericOperand(postfix[i]) )
+        if ( !isOperator(*postfix) && !isNumericOperand(*postfix) )
             continue;
 
 
         // current element is operand
         // push to stack
-        if ( isNumericOperand(postfix[i]) )
-            push(operands, (TYPE)postfix[i]-'0');
+        if ( isNumericOperand(*postfix) )
+            push(operands, (TYPE) *postfix - '0');
 
         // current element is operator
         // pop last two operands stack
-        else if ( isOperator(postfix[i]) )
+        else if ( isOperator(*postfix) )
         {
             // dummy variables to store last two popped operands
             int x,y;
@@ -279,7 +278,7 @@ TYPE evaluatePostfix (String postfix)
 
 
             // operational step based on operator
-            switch(postfix[i])
+            switch (*postfix)
             {
                 case '+' :
                     push(operands, x+y);
@@ -311,6 +310,21 @@ TYPE evaluatePostfix (String postfix)
                     return 0;
             }
         }
+
+
+        // scanned character is space
+        // considered a delimiter
+        // skipped
+        else if ( isspace(*postfix) );
+
+
+        // scanned character is neither alphabetical/numerical operand nor operator
+        // invalid statement
+        else
+            return NULL;
+
+        // increment pointer
+        postfix++;
     }
 
     // stack at this point of time can not have more than one element
