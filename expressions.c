@@ -48,8 +48,12 @@ int isOperator (char character)
             return true;
 
         default:
-            return false;
+            break;
     }
+
+    // default case better be outside switch case
+    // avoiding compiling warnings
+    return false;
 }
 
 
@@ -76,8 +80,12 @@ int getPriority (char character)
             return 9;
 
         default:
-            return -1;
+            break;
     }
+
+    // default case better be outside switch case
+    // avoiding compiling warnings
+    return -1;
 }
 
 
@@ -92,11 +100,13 @@ String infixToPostfix (String infix)
     // postfix string declaration
     char * postfix = NULL;
 
-    // string iterator for reallocating and storing
+    // string iterator for reallocating and indexing
     int k = 0;
 
-    // boolean variable for mismatched parenthesis exception
-    int waitingForClosingBracket = false;
+    // counter variables for mismatched parenthesis exception
+    // should be equal at end of expression
+    int openedBrackets = 0;
+    int closedBrackets = 0;
 
     while ( *infix != '\0' )
     {
@@ -111,73 +121,101 @@ String infixToPostfix (String infix)
 
 
         // scanned character is an '('
-        // push to stack
         else if ( *infix == '(' )
         {
+            // assure valid expression
+            // '( followed by operator
+            if ( isOperator(*(infix + 1)) )
+                return NULL;
+
             // bracket opened
-            waitingForClosingBracket = true;
-            
+            openedBrackets++;
+
+            // push to stack
             push(operators , *infix);
         }
 
 
         // scanned character is an ')'
-        // pop and output from the stack until an '(' is encountered
         else if ( *infix == ')' )
         {
-            // bracket closed
-            waitingForClosingBracket = false;
+            // assure valid expression
+            // ')' preceded by operator
+            if ( isOperator(*(infix - 1)) )
+                return NULL;
 
-            // dummy variable to store popped element to be added to string later
+            // bracket closed
+            closedBrackets++;
+
+            // dummy variable to store popped element to be added into postfix string
             char temp;
 
+            // pop and output from the stack until an '(' is encountered
             while ( !isEmptyStack(operators) && (temp = pop(operators)) != '(')
             {
-                // check for mismatched parenthesis
-                // i.e. closing parenthesis with no opening one
-                if( isEmptyStack(operators) && temp != '(' )
-                    return NULL;
-
-                postfix = realloc(postfix, (++k)*sizeof(char) );
-                postfix[k-1] = temp;
+                // i.e. brackets should not be added to postfix strings
+                if( temp != '(' )
+                {
+                    postfix = realloc(postfix, (++k)*sizeof(char) );
+                    postfix[k-1] = temp;
+                }
             }
         }
 
 
+        // scanned character is operator
         else if ( isOperator(*infix) )
         {
             // check priority
-            while ( getPriority(getPeekValue(operators)) >= getPriority(*infix) )
+            while ( getPriority(getPeekValue(operators)) > getPriority(*infix) )
             {
+                // dummy variable to store popped element to be added into postfix string
+                char temp = pop(operators);
+
                 // scanned character priority is less than stack's peek value
                 // pop all less prior
-                postfix = realloc(postfix, (++k)*sizeof(char) );
-                postfix[k-1] =pop(operators);
+                // i.e. brackets should not be added to postfix strings
+                if( temp != '(' )
+                {
+                    postfix = realloc(postfix, (++k)*sizeof(char) );
+                    postfix[k-1] = temp;
+                }
             }
 
             // then push scanned character
             push(operators , *infix);
         }
 
+
+        // scanned character is neither alphabetical/numerical operand nor operator
+        // invalid statement
+        else return NULL;
+
+
         // increment pointer
         infix++;
     }
 
+
+    // pop all left operators in stack into postfix string
     while (!isEmptyStack(operators))
     {
         postfix = realloc(postfix, (++k)*sizeof(char) );
-        postfix[k-1] =pop(operators);
+        postfix[k-1] = pop(operators);
     }
 
-    // add null char to end string
+
+    // add null character to end of string
     postfix = realloc(postfix, (++k)*sizeof(char) );
-    postfix[k-1] ='\0';
+    postfix[k-1] = '\0';
 
 
     // check for mismatched parenthesis
-    // i.e. opening parenthesis with no closing one    
-    if (waitingForClosingBracket)
+    // should be equal at end of expression
+    // i.e. opening parenthesis with no closing one
+    if (openedBrackets != closedBrackets)
         return NULL;
+
 
     return postfix;
 }
@@ -187,6 +225,11 @@ String infixToPostfix (String infix)
  */
 TYPE evaluatePostfix (String postfix)
 {
+    // assure an expression is received
+    // avoiding run-time errors
+    if (postfix == NULL)
+        return (TYPE) 0;
+
     // stack to store operands
     Stack * operands = constructStack(strlen(postfix));
 
@@ -210,38 +253,42 @@ TYPE evaluatePostfix (String postfix)
             // dummy variables to store last two popped operands
             int x,y;
 
-            // first operand sanity check
-            if(isEmptyStack(operands)) return (TYPE)NULL;
-            else x = pop(operands);
-
-            // second operand sanity check
-            if(isEmptyStack(operands)) return (TYPE)NULL;
+            // first popped is second operand
+            // sanity check
+            if(isEmptyStack(operands)) return (TYPE) 0;
             else y = pop(operands);
 
-            // switch on operator
+            // second popped is first operand
+            // sanity check
+            if(isEmptyStack(operands)) return (TYPE) 0;
+            else x = pop(operands);
+
+            // operational step based on operator
             switch(postfix[i])
             {
                 case '+' : push(operands, x+y); break;
                 case '-' : push(operands, x-y); break;
                 case '*' : push(operands, x*y); break;
                 case '/' : push(operands, x/y); break;
+                case '^' : push(operands, pow(x,y)); break;
 
                 // error
-                default : return (TYPE)NULL;
+                default : return (TYPE) 0;
             }
         }
     }
 
     // stack at this point of time can not have more than one element
-    if(operands->top != 1)
-        return (TYPE)NULL;
+    if (operands->top != 1)
+        return (TYPE) 0;
 
     return getPeekValue(operands);
 }
 
 
 /* evaluates a given infix expression.
- * converts first to postfix.
+ * converts to postfix.
+ * evaluate postfix.
  */
 TYPE evaluateInfix (String infix)
 {
