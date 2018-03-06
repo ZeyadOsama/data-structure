@@ -1,6 +1,6 @@
 /*
  *
- * C Program To Implement Constricted Stack Using Dynamic Memory Allocation
+ * C Program To Implement Constricted Stack Using Dynamic Memory Allocation.
  *
  */
 
@@ -18,14 +18,14 @@
 Stack * constructStack (int length)
 {
 	// dynamically allocating memory for stack
-	Stack * stack = (Stack*) malloc(sizeof(Stack));
+	Stack * stack = malloc(sizeof(Stack));
 
 	// failure check
 	if(stack==NULL)
         return NULL;
 
 	// dynamically allocating memory for elements
-	stack->elements = (TYPE*) malloc(length*sizeof(TYPE));
+	stack->elements = malloc(length*sizeof(TYPE));
 
 	// failure check
 	if(stack->elements==NULL)
@@ -37,7 +37,7 @@ Stack * constructStack (int length)
         return NULL;
 	}
 
-	// if succuessfully allocated
+	// if successfully allocated
 	// initializing stack content
 	stack->top = 0;
 	stack->length = length;
@@ -84,7 +84,7 @@ TYPE pop (Stack * stack)
 {
 	// check first if already empty
 	if(isEmptyStack(stack))
-        return stack->exception = STACK_IS_EMPTY;
+        return stack->exception = (TYPE) STACK_IS_EMPTY;
 
     // no thrown exceptions
     stack->exception = NO_EXCEPETIONS;
@@ -102,7 +102,7 @@ TYPE getPeekValue (Stack * stack)
 {
     // avoid garbage display
 	if (isEmptyStack(stack))
-        return NULL;
+        return 0;
 
     return stack->elements[stack->top-1];
 }
@@ -142,7 +142,78 @@ void displayStack (Stack * stack)
 }
 
 
-/* boolean check
+/* boolean check.
+ * searches for a given target within a given stack.
+ */
+int searchStack (Stack * stack , TYPE target)
+{
+	// temporary stack to reserve sent one
+	Stack * tempStack = constructStack(stack->top);
+
+	copyStack(tempStack , stack);
+
+	while ( !isEmptyStack(tempStack) )
+		if ( target == pop(tempStack) )
+		{
+			// avoid memory leakage
+			destructStack(tempStack);
+
+			return true;
+		}
+
+	// deallocate temporary stack
+	// avoid memory leakage
+	destructStack(tempStack);
+
+	return false;
+}
+
+
+/* copies a stack into another one.
+ */
+void copyStack (Stack * stackDestination , Stack * stackSource)
+{
+	int TOP = stackSource->top;
+
+	// iterator
+	int i = stackSource->top;
+
+	while( i>=1 )
+		push(stackDestination , stackSource->elements[TOP-(i--)] );
+}
+
+
+/* reverses a given stack from top to bottom.
+ */
+Stack * reverseStack (Stack * stack)
+{
+	// temporary stack to reserve sent one
+	Stack * reversedStack = constructStack(stack->top);
+
+	int TOP = stack->top;
+
+	// iterator
+	int i = 1;
+
+	// reversing step
+	while ( i<=TOP )
+		push(reversedStack , stack->elements[TOP-(i++)] );
+
+    // unload stack to push reversed elements order
+    unloadStack(stack);
+
+    // copy reversed temporary stack to sent one
+    copyStack(stack , reversedStack);
+
+	// deallocate temporary stack
+	// avoid memory leakage
+	destructStack(reversedStack);
+
+	return stack;
+}
+
+
+/* boolean check.
  */
 int isFullStack (Stack * stack)
 {
@@ -150,7 +221,7 @@ int isFullStack (Stack * stack)
 }
 
 
-/* boolean check
+/* boolean check.
  */
 int isEmptyStack (Stack * stack)
 {
@@ -158,24 +229,7 @@ int isEmptyStack (Stack * stack)
 }
 
 
-/*
-void searchStack (Stack * stack , TYPE target)
-{
-	int i,j;
-
-	for (i=0; i<stack->top ; i++)
-	{
-		for (j=0; j<i ; j++)
-		{
-			// TO DO CODE HERE
-		}
-	}
-}
-*/
-
-
-/* expects one parameter: any given stack address.
- * functionality: handles exceptions that may occur in a given stack
+/* handles exceptions that may occur in a given stack.
  */
 void stackExeptionHandler (Stack * stack)
 {
