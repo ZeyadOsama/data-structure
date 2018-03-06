@@ -45,11 +45,13 @@ TYPE getPeekValue (Stack * stack);
 // boolean checks
 int isFullStack (Stack * stack);
 int isEmptyStack (Stack * stack);
+int searchStack (Stack * stack , TYPE target);
 
 
 // utility functions
 void displayStack (Stack * stack);
-void searchStack (Stack * stack , TYPE target);
+void copyStack (Stack * stackDestination , Stack * stackSource);
+Stack * reverseStack (Stack * stack);
 
 int unloadStack (Stack * stack);
 
