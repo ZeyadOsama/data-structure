@@ -96,6 +96,11 @@ int getPriority (char character)
  */
 String infixToPostfix (String infix)
 {
+    // assure an expression is received
+    // avoiding run-time errors
+    if (postfix == NULL)
+        return NULL;
+
     // stores operators
     Stack * operators = constructStack(strlen(infix));
 
@@ -110,6 +115,7 @@ String infixToPostfix (String infix)
     int openedBrackets = 0;
     int closedBrackets = 0;
 
+    // loop on string
     while ( *infix != '\0' )
     {
         // checks whether entered value is either
@@ -242,22 +248,17 @@ TYPE evaluatePostfix (String postfix)
     // stack to store operands
     Stack * operands = constructStack(strlen(postfix));
 
-    int i;
-    for (i=0 ; i<strlen(postfix) ; i++)
+    // loop on string
+    while ( *postfix != '\0')
     {
-        // delimiters should be excluded
-        if ( !isOperator(postfix[i]) && !isNumericOperand(postfix[i]) )
-            continue;
-
-
         // current element is operand
         // push to stack
-        if ( isNumericOperand(postfix[i]) )
-            push(operands, (TYPE) postfix[i]-'0');
+        if ( isNumericOperand(*postfix) )
+            push(operands, (TYPE) *postfix - '0');
 
         // current element is operator
         // pop last two operands stack
-        else if ( isOperator(postfix[i]) )
+        else if ( isOperator(*postfix) )
         {
             // dummy variables to store last two popped operands
             int x,y;
@@ -279,7 +280,7 @@ TYPE evaluatePostfix (String postfix)
 
 
             // operational step based on operator
-            switch(postfix[i])
+            switch(*postfix)
             {
                 case '+' :
                     push(operands, x+y);
@@ -311,6 +312,22 @@ TYPE evaluatePostfix (String postfix)
                     return 0;
             }
         }
+
+
+        // scanned character is space
+        // considered a delimiter
+        // skipped
+        else if ( isspace(*postfix) );
+
+
+        // scanned character is neither alphabetical/numerical operand nor operator
+        // invalid statement
+        else
+            return (TYPE) 0;
+
+
+        // increment pointer
+        postfix++;
     }
 
     // stack at this point of time can not have more than one element
