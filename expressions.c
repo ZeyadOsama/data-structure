@@ -264,13 +264,19 @@ TYPE evaluatePostfix (String postfix)
 
             // first popped is second operand
             // sanity check
-            if(isEmptyStack(operands)) return (TYPE) 0;
-            else y = pop(operands);
+            if ( isEmptyStack(operands) )
+                return 0;
+            else
+                y = pop(operands);
+
 
             // second popped is first operand
             // sanity check
-            if(isEmptyStack(operands)) return (TYPE) 0;
-            else x = pop(operands);
+            if ( isEmptyStack(operands) )
+                return 0;
+            else
+                x = pop(operands);
+
 
             // operational step based on operator
             switch(postfix[i])
@@ -291,7 +297,7 @@ TYPE evaluatePostfix (String postfix)
                     // handling division by zero
                     // mathematical error
                     if(y == 0)
-                        return (TYPE) 0;
+                        return 0;
 
                     push(operands, x/y);
                     break;
@@ -302,14 +308,14 @@ TYPE evaluatePostfix (String postfix)
 
                 // unexpected error
                 default :
-                    return (TYPE) 0;
+                    return 0;
             }
         }
     }
 
     // stack at this point of time can not have more than one element
     if (operands->top != 1)
-        return (TYPE) 0;
+        return 0;
 
     return getPeekValue(operands);
 }
