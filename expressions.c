@@ -169,7 +169,7 @@ String infixToPostfix (String infix)
         else if ( isOperator(*infix) )
         {
             // check priority
-            while ( getPriority(getPeekValue(operators)) >= getPriority(*infix) )
+            while ( getPriority(getPeekValue(operators)) > getPriority(*infix) )
             {
                 // dummy variable to store popped element to be added into postfix string
                 char temp = pop(operators);
@@ -242,21 +242,22 @@ TYPE evaluatePostfix (String postfix)
     // stack to store operands
     Stack * operands = constructStack(strlen(postfix));
 
-    while ( *postfix != '\0' )
+    int i;
+    for (i=0 ; i<strlen(postfix) ; i++)
     {
         // delimiters should be excluded
-        if ( !isOperator(*postfix) && !isNumericOperand(*postfix) )
+        if ( !isOperator(postfix[i]) && !isNumericOperand(postfix[i]) )
             continue;
 
 
         // current element is operand
         // push to stack
-        if ( isNumericOperand(*postfix) )
-            push(operands, (TYPE) *postfix - '0');
+        if ( isNumericOperand(postfix[i]) )
+            push(operands, (TYPE) postfix[i]-'0');
 
         // current element is operator
         // pop last two operands stack
-        else if ( isOperator(*postfix) )
+        else if ( isOperator(postfix[i]) )
         {
             // dummy variables to store last two popped operands
             int x,y;
@@ -278,7 +279,7 @@ TYPE evaluatePostfix (String postfix)
 
 
             // operational step based on operator
-            switch (*postfix)
+            switch(postfix[i])
             {
                 case '+' :
                     push(operands, x+y);
@@ -310,21 +311,6 @@ TYPE evaluatePostfix (String postfix)
                     return 0;
             }
         }
-
-
-        // scanned character is space
-        // considered a delimiter
-        // skipped
-        else if ( isspace(*postfix) );
-
-
-        // scanned character is neither alphabetical/numerical operand nor operator
-        // invalid statement
-        else
-            return NULL;
-
-        // increment pointer
-        postfix++;
     }
 
     // stack at this point of time can not have more than one element
