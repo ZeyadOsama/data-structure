@@ -169,7 +169,7 @@ String infixToPostfix (String infix)
         else if ( isOperator(*infix) )
         {
             // check priority
-            while ( getPriority(getPeekValue(operators)) > getPriority(*infix) )
+            while ( getPriority(getPeekValue(operators)) >= getPriority(*infix) )
             {
                 // dummy variable to store popped element to be added into postfix string
                 char temp = pop(operators);
