@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <math.h>
 
 #include "myString.h"
 #include "stack.h"
@@ -187,9 +189,16 @@ String infixToPostfix (String infix)
         }
 
 
+        // scanned character is space
+        // considered a delimiter
+        // skipped
+        else if ( isspace(*infix) );
+
+
         // scanned character is neither alphabetical/numerical operand nor operator
         // invalid statement
-        else return NULL;
+        else
+            return NULL;
 
 
         // increment pointer
@@ -266,14 +275,34 @@ TYPE evaluatePostfix (String postfix)
             // operational step based on operator
             switch(postfix[i])
             {
-                case '+' : push(operands, x+y); break;
-                case '-' : push(operands, x-y); break;
-                case '*' : push(operands, x*y); break;
-                case '/' : push(operands, x/y); break;
-                case '^' : push(operands, pow(x,y)); break;
+                case '+' :
+                    push(operands, x+y);
+                    break;
 
-                // error
-                default : return (TYPE) 0;
+                case '-' :
+                    push(operands, x-y);
+                    break;
+
+                case '*' :
+                    push(operands, x*y);
+                    break;
+
+                case '/' :
+                    // handling division by zero
+                    // mathematical error
+                    if(y == 0)
+                        return (TYPE) 0;
+
+                    push(operands, x/y);
+                    break;
+
+                case '^' :
+                    push(operands, pow(x,y));
+                    break;
+
+                // unexpected error
+                default :
+                    return (TYPE) 0;
             }
         }
     }
