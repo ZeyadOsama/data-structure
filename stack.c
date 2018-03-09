@@ -22,7 +22,7 @@ Stack * constructStack (int length)
 
 	// failure check
 	if(stack==NULL)
-        return NULL;
+		return NULL;
 
 	// dynamically allocating memory for elements
 	stack->elements = malloc(length*sizeof(TYPE));
@@ -32,9 +32,11 @@ Stack * constructStack (int length)
 	{
 		stack->exception = FAILED_TO_CONSTRUCT;
 
-		// freeing stack struct if array within the struct could not be allocated
+		// if array within the struct could not be allocated
+		// deallocate stack struct
 		free(stack);
-        return NULL;
+
+		return NULL;
 	}
 
 	// if successfully allocated
@@ -52,8 +54,10 @@ Stack * constructStack (int length)
 int destructStack (Stack * stack)
 {
 	stack->exception = STACK_IS_DESTRUCTED;
-    free(stack->elements);
-    free(stack);
+
+	// deallocate
+	free(stack->elements);
+	free(stack);
 
 	return NO_EXCEPETIONS;
 }
@@ -66,7 +70,7 @@ int push (Stack * stack , TYPE value)
 {
 	// check first if already full
 	if(isFullStack(stack))
-        return stack->exception = STACK_IS_FULL;
+		return stack->exception = STACK_IS_FULL;
 
 	// increment top then push
 	stack->elements[stack->top++]=value;
@@ -84,10 +88,10 @@ TYPE pop (Stack * stack)
 {
 	// check first if already empty
 	if(isEmptyStack(stack))
-        return stack->exception = (TYPE) STACK_IS_EMPTY;
+		return stack->exception = (TYPE) STACK_IS_EMPTY;
 
-    // no thrown exceptions
-    stack->exception = NO_EXCEPETIONS;
+	// no thrown exceptions
+	stack->exception = NO_EXCEPETIONS;
 
 	// decrement top then pop
 	return stack->elements[--stack->top];
@@ -100,11 +104,11 @@ TYPE pop (Stack * stack)
  */
 TYPE getPeekValue (Stack * stack)
 {
-    // avoid garbage display
+	// avoid garbage display
 	if (isEmptyStack(stack))
-        return 0;
+		return 0;
 
-    return stack->elements[stack->top-1];
+	return stack->elements[stack->top-1];
 }
 
 
@@ -147,43 +151,39 @@ void displayStack (Stack * stack)
  */
 int searchStack (Stack * stack , TYPE target)
 {
-	// temporary stack to reserve sent one
-	Stack * tempStack = constructStack(stack->top);
+	// boundary variable
+	int TOP = stack->top;
 
-	copyStack(tempStack , stack);
+	// iterator
+	int i = stack->top;
 
-	while ( !isEmptyStack(tempStack) )
-		if ( target == pop(tempStack) )
-		{
-			// avoid memory leakage
-			destructStack(tempStack);
-
+	// push element by element
+	while( i>=1 )
+		if ( target == stack->elements[TOP-(i--)] )
 			return true;
-		}
-
-	// deallocate temporary stack
-	// avoid memory leakage
-	destructStack(tempStack);
 
 	return false;
 }
 
 
-/* copies a stack into another one.
+/* copies a stack into one another.
  */
 void copyStack (Stack * stackDestination , Stack * stackSource)
 {
+	// boundary variable
 	int TOP = stackSource->top;
 
 	// iterator
 	int i = stackSource->top;
 
+	// push element by element
 	while( i>=1 )
 		push(stackDestination , stackSource->elements[TOP-(i--)] );
 }
 
 
 /* reverses a given stack from top to bottom.
+ * returns a pointer to the same given stack.
  */
 Stack * reverseStack (Stack * stack)
 {
@@ -195,17 +195,17 @@ Stack * reverseStack (Stack * stack)
 	// iterator
 	int i = 1;
 
-	// reversing step
+	// reversing
 	while ( i<=TOP )
 		push(reversedStack , stack->elements[TOP-(i++)] );
 
-    // unload stack to push reversed elements order
+    // unload sent stack to push reversed elements order
     unloadStack(stack);
 
     // copy reversed temporary stack to sent one
     copyStack(stack , reversedStack);
 
-	// deallocate temporary stack
+	// deallocate due function stack
 	// avoid memory leakage
 	destructStack(reversedStack);
 
@@ -237,18 +237,18 @@ void stackExeptionHandler (Stack * stack)
 	{
 		// no thrown exceptions
 		case NO_EXCEPETIONS:
-			break;
+			return;
 
 		case STACK_IS_FULL:
 			fprintf(stderr,"stack is full\n");
-			break;
+			return;
 
 		case STACK_IS_EMPTY:
 			fprintf(stderr,"stack is empty\n");
-			break;
+			return;
 
 		case STACK_IS_DESTRUCTED:
 			fprintf(stderr,"stack is destructed\n");
-			break;
+			return;
 	}
 }
