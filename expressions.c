@@ -285,7 +285,6 @@ String infixToPostfix (String infix)
     // avoid memory leakage
     destructStack(operatorStack);
     destructStack(bracketStack);
-    free(postfix);
 
     return postfix;
 }
