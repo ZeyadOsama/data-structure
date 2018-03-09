@@ -142,9 +142,11 @@ String infixToPostfix (String infix)
             if ( isOperator(*(infix + 1)) )
             {
                 // deallocate due function stacks
+                // deallocate string
                 // avoid memory leakage
                 destructStack(operatorStack);
                 destructStack(bracketStack);
+                free(postfix);
 
                 return NULL;
             }
@@ -167,9 +169,11 @@ String infixToPostfix (String infix)
             if ( isOperator(*(infix - 1)) )
             {
                 // deallocate due function stacks
+                // deallocate string
                 // avoid memory leakage
                 destructStack(operatorStack);
                 destructStack(bracketStack);
+                free(postfix);
                 
                 return NULL;
             }
@@ -233,9 +237,11 @@ String infixToPostfix (String infix)
         else
         {
             // deallocate due function stacks
+            // deallocate string
             // avoid memory leakage
             destructStack(operatorStack);
             destructStack(bracketStack);
+            free(postfix);
             
             return NULL;
         }
@@ -265,17 +271,21 @@ String infixToPostfix (String infix)
     if ( !isEmptyStack(bracketStack) || !hasOperand )
     {
         // deallocate due function stacks
+        // deallocate string
         // avoid memory leakage
         destructStack(operatorStack);
         destructStack(bracketStack);
+        free(postfix);
         
         return NULL;
     }
 
     // deallocate due function stacks
+    // deallocate string
     // avoid memory leakage
     destructStack(operatorStack);
     destructStack(bracketStack);
+    free(postfix);
 
     return postfix;
 }
