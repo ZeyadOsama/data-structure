@@ -98,22 +98,25 @@ String infixToPostfix (String infix)
 {
     // assure an expression is received
     // avoiding run-time errors
-    if (postfix == NULL)
+    if (infix == NULL)
         return NULL;
 
     // stores operators
-    Stack * operators = constructStack(strlen(infix));
+    Stack * operatorStack = constructStack(strlen(infix));
 
+    // stores brackets
+    // stack for validating a given infix
+    Stack * bracketStack = constructStack(strlen(infix));
+
+    // boolean for validating a given infix
+    short hasOperand = false;
+    
     // postfix string declaration
     char * postfix = NULL;
 
     // string iterator for reallocating and indexing
     int k = 0;
 
-    // counter variables for mismatched parenthesis exception
-    // should be equal at end of expression
-    int openedBrackets = 0;
-    int closedBrackets = 0;
 
     // loop on string
     while ( *infix != '\0' )
@@ -123,6 +126,9 @@ String infixToPostfix (String infix)
         // i.e. can also be -> if ( isalnum(*infix) )
         if ( isNumericOperand(*infix) || isAlphaOperand(*infix) )
         {
+            // assure valid expression
+            hasOperand = true;
+
             postfix = realloc(postfix, (++k)*sizeof(char) );
             postfix[k-1] = *infix;
         }
@@ -134,13 +140,22 @@ String infixToPostfix (String infix)
             // assure valid expression
             // '( followed by operator
             if ( isOperator(*(infix + 1)) )
+            {
+                // deallocate due function stacks
+                // avoid memory leakage
+                destructStack(operatorStack);
+                destructStack(bracketStack);
+
                 return NULL;
+            }
 
+            // assure valid expression
             // bracket opened
-            openedBrackets++;
-
             // push to stack
-            push(operators , *infix);
+            push(bracketStack,'(');
+
+            // push operand to stack
+            push(operatorStack , *infix);
         }
 
 
@@ -150,16 +165,28 @@ String infixToPostfix (String infix)
             // assure valid expression
             // ')' preceded by operator
             if ( isOperator(*(infix - 1)) )
+            {
+                // deallocate due function stacks
+                // avoid memory leakage
+                destructStack(operatorStack);
+                destructStack(bracketStack);
+                
                 return NULL;
+            }
 
+            // assure valid expression
             // bracket closed
-            closedBrackets++;
+            if ( isEmptyStack(bracketStack) )
+                return 0;
+            else 
+                pop(bracketStack);
+
 
             // dummy variable to store popped element to be added into postfix string
             char temp;
 
             // pop and output from the stack until an '(' is encountered
-            while ( !isEmptyStack(operators) && (temp = pop(operators)) != '(')
+            while ( !isEmptyStack(operatorStack) && (temp = pop(operatorStack)) != '(')
             {
                 // i.e. brackets should not be added to postfix strings
                 if( temp != '(' )
@@ -175,10 +202,10 @@ String infixToPostfix (String infix)
         else if ( isOperator(*infix) )
         {
             // check priority
-            while ( getPriority(getPeekValue(operators)) > getPriority(*infix) )
+            while ( getPriority(getPeekValue(operatorStack)) >= getPriority(*infix) )
             {
                 // dummy variable to store popped element to be added into postfix string
-                char temp = pop(operators);
+                char temp = pop(operatorStack);
 
                 // scanned character priority is less than stack's peek value
                 // pop all less prior
@@ -191,7 +218,7 @@ String infixToPostfix (String infix)
             }
 
             // then push scanned character
-            push(operators , *infix);
+            push(operatorStack , *infix);
         }
 
 
@@ -202,9 +229,16 @@ String infixToPostfix (String infix)
 
 
         // scanned character is neither alphabetical/numerical operand nor operator
-        // invalid statement
+        // invalid expression
         else
+        {
+            // deallocate due function stacks
+            // avoid memory leakage
+            destructStack(operatorStack);
+            destructStack(bracketStack);
+            
             return NULL;
+        }
 
 
         // increment pointer
@@ -213,10 +247,10 @@ String infixToPostfix (String infix)
 
 
     // pop all left operators in stack into postfix string
-    while (!isEmptyStack(operators))
+    while (!isEmptyStack(operatorStack))
     {
         postfix = realloc(postfix, (++k)*sizeof(char) );
-        postfix[k-1] = pop(operators);
+        postfix[k-1] = pop(operatorStack);
     }
 
 
@@ -225,12 +259,23 @@ String infixToPostfix (String infix)
     postfix[k-1] = '\0';
 
 
-    // check for mismatched parenthesis
-    // should be equal at end of expression
-    // i.e. opening parenthesis with no closing one
-    if (openedBrackets != closedBrackets)
+    // assure valid expression.
+    // check for mismatched parenthesis, operand stack must be empty at end of expression.
+    // check for operands, boolean must be true.
+    if ( !isEmptyStack(bracketStack) || !hasOperand )
+    {
+        // deallocate due function stacks
+        // avoid memory leakage
+        destructStack(operatorStack);
+        destructStack(bracketStack);
+        
         return NULL;
+    }
 
+    // deallocate due function stacks
+    // avoid memory leakage
+    destructStack(operatorStack);
+    destructStack(bracketStack);
 
     return postfix;
 }
@@ -246,7 +291,7 @@ TYPE evaluatePostfix (String postfix)
         return (TYPE) 0;
 
     // stack to store operands
-    Stack * operands = constructStack(strlen(postfix));
+    Stack * operandStack = constructStack(strlen(postfix));
 
     // loop on string
     while ( *postfix != '\0')
@@ -254,7 +299,7 @@ TYPE evaluatePostfix (String postfix)
         // current element is operand
         // push to stack
         if ( isNumericOperand(*postfix) )
-            push(operands, (TYPE) *postfix - '0');
+            push(operandStack, (TYPE) *postfix - '0');
 
         // current element is operator
         // pop last two operands stack
@@ -265,46 +310,66 @@ TYPE evaluatePostfix (String postfix)
 
             // first popped is second operand
             // sanity check
-            if ( isEmptyStack(operands) )
+            if ( isEmptyStack(operandStack) )
+            {
+                // deallocate due function stack
+                // avoid memory leakage
+                destructStack(operandStack);
+
                 return 0;
+            }
+
             else
-                y = pop(operands);
+                y = pop(operandStack);
 
 
             // second popped is first operand
             // sanity check
-            if ( isEmptyStack(operands) )
+            if ( isEmptyStack(operandStack) )
+            {
+                // deallocate due function stack
+                // avoid memory leakage
+                destructStack(operandStack);
+
                 return 0;
+            }
+
             else
-                x = pop(operands);
+                x = pop(operandStack);
 
 
             // operational step based on operator
             switch(*postfix)
             {
                 case '+' :
-                    push(operands, x+y);
+                    push(operandStack, x+y);
                     break;
 
                 case '-' :
-                    push(operands, x-y);
+                    push(operandStack, x-y);
                     break;
 
                 case '*' :
-                    push(operands, x*y);
+                    push(operandStack, x*y);
                     break;
 
                 case '/' :
                     // handling division by zero
                     // mathematical error
                     if(y == 0)
-                        return 0;
+                    {
+                        // deallocate due function stack
+                        // avoid memory leakage
+                        destructStack(operandStack);
 
-                    push(operands, x/y);
+                        return 0;
+                    }
+
+                    push(operandStack, x/y);
                     break;
 
                 case '^' :
-                    push(operands, pow(x,y));
+                    push(operandStack, pow(x,y));
                     break;
 
                 // unexpected error
@@ -323,7 +388,13 @@ TYPE evaluatePostfix (String postfix)
         // scanned character is neither alphabetical/numerical operand nor operator
         // invalid statement
         else
-            return (TYPE) 0;
+        {
+            // deallocate due function stack
+            // avoid memory leakage
+            destructStack(operandStack);
+
+            return 0;
+        }
 
 
         // increment pointer
@@ -331,10 +402,23 @@ TYPE evaluatePostfix (String postfix)
     }
 
     // stack at this point of time can not have more than one element
-    if (operands->top != 1)
+    if (operandStack->top != 1)
+    {
+        // deallocate due function stack
+        // avoid memory leakage
+        destructStack(operandStack);
+        
         return 0;
+    }
 
-    return getPeekValue(operands);
+    // must be assigned before deallocation
+    TYPE answer = getPeekValue(operandStack);
+    
+    // deallocate due function stack
+    // avoid memory leakage
+    destructStack(operandStack);
+
+    return answer;
 }
 
 
