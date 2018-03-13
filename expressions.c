@@ -67,6 +67,9 @@ int getPriority (char character)
 {
     switch (character)
     {
+        case '(':
+            return 0;
+
         case '+':
         case '-':
             return 1;
@@ -77,9 +80,6 @@ int getPriority (char character)
 
         case '^':
             return 3;
-
-        case '(':
-            return 9;
 
         default:
             break;
@@ -110,7 +110,7 @@ String infixToPostfix (String infix)
 
     // boolean for validating a given infix
     short hasOperand = false;
-    
+
     // postfix string declaration
     char * postfix = NULL;
 
@@ -174,15 +174,15 @@ String infixToPostfix (String infix)
                 destructStack(operatorStack);
                 destructStack(bracketStack);
                 free(postfix);
-                
+
                 return NULL;
             }
 
             // assure valid expression
             // bracket closed
             if ( isEmptyStack(bracketStack) )
-                return 0;
-            else 
+                return NULL;
+            else
                 pop(bracketStack);
 
 
@@ -242,7 +242,7 @@ String infixToPostfix (String infix)
             destructStack(operatorStack);
             destructStack(bracketStack);
             free(postfix);
-            
+
             return NULL;
         }
 
@@ -276,7 +276,7 @@ String infixToPostfix (String infix)
         destructStack(operatorStack);
         destructStack(bracketStack);
         free(postfix);
-        
+
         return NULL;
     }
 
@@ -416,13 +416,13 @@ TYPE evaluatePostfix (String postfix)
         // deallocate due function stack
         // avoid memory leakage
         destructStack(operandStack);
-        
+
         return 0;
     }
 
     // must be assigned before deallocation
     TYPE answer = getPeekValue(operandStack);
-    
+
     // deallocate due function stack
     // avoid memory leakage
     destructStack(operandStack);
